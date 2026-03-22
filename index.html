@@ -7,53 +7,45 @@
     <style>
         :root {
             --gold: #ffd700;
-            --red: #ff0040;
-            --blue: #00d9ff;
-            --ui-bg: rgba(0, 0, 0, 0.6);
+            --red: #ff3232;
+            --blue: #2196f3;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
-        html, body {
+        body, html {
             margin: 0; padding: 0;
-            width: 100%; height: 100%;
+            width: 100vw; height: 100vh;
             overflow: hidden;
-            background-color: #87ceeb; /* Sky Blue */
-            font-family: 'Segoe UI', Impact, sans-serif;
-            color: white;
-            touch-action: none;
+            background: #87ceeb;
+            font-family: 'Arial Black', sans-serif;
         }
 
-        #game-wrapper {
-            position: fixed;
-            inset: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1;
+        /* FORCE LANDSCAPE WRAPPER */
+        #orientation-wrapper {
+            position: absolute;
+            width: 100vw; height: 100vh;
+            display: flex; justify-content: center; align-items: center;
         }
 
-        /* AUTO-LANDSCAPE HACK */
         @media screen and (orientation: portrait) {
-            #main-container {
+            #game-container {
                 width: 100vh !important;
                 height: 100vw !important;
                 transform: rotate(90deg);
-                transform-origin: center center;
             }
         }
 
-        #main-container {
+        #game-container {
             position: relative;
             width: 100%; height: 100%;
             background: #000;
-            overflow: hidden;
         }
 
-        canvas { width: 100% !important; height: 100% !important; display: block; }
+        canvas { display: block; width: 100%; height: 100%; }
 
-        /* UI OVERLAYS */
-        .screen {
+        /* UI SCREENS */
+        .overlay {
             position: absolute;
             inset: 0;
             z-index: 100;
@@ -62,121 +54,116 @@
             justify-content: center;
             align-items: center;
             background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(10px);
+            color: white;
+            text-align: center;
         }
 
         .hidden { display: none !important; }
 
-        h1 {
-            font-size: clamp(2rem, 15vh, 6rem);
-            margin: 0;
-            letter-spacing: 10px;
-            color: #fff;
-            text-shadow: 0 0 20px var(--red);
-            font-style: italic;
-        }
-
-        button {
-            padding: 20px 40px;
+        h1 { font-size: 4rem; margin: 0; text-shadow: 0 0 20px var(--red); font-style: italic; }
+        
+        .btn-main {
+            padding: 20px 50px;
             font-size: 1.5rem;
-            font-weight: 900;
-            text-transform: uppercase;
             background: var(--red);
             color: white;
             border: none;
+            border-radius: 50px;
             cursor: pointer;
-            border-radius: 5px;
-            box-shadow: 0 5px 15px rgba(255,0,0,0.4);
+            margin-top: 20px;
+            box-shadow: 0 5px 15px rgba(255,0,0,0.5);
         }
 
         /* HUD */
         #hud {
             position: absolute;
             top: 20px; left: 20px; right: 20px;
-            display: flex;
-            justify-content: space-between;
-            pointer-events: none;
-            z-index: 10;
+            display: flex; justify-content: space-between;
+            pointer-events: none; z-index: 10;
         }
 
-        .hud-card {
-            background: var(--ui-bg);
-            padding: 10px 20px;
-            border-radius: 8px;
-            border-bottom: 3px solid var(--blue);
+        .hud-item {
+            background: rgba(0,0,0,0.6);
+            padding: 10px 25px;
+            border-radius: 15px;
+            border: 2px solid var(--blue);
+            color: white;
         }
 
-        .coin-count { color: var(--gold); font-weight: bold; }
-
-        /* ARROW CONTROLS */
-        .ctrl-btn {
+        /* SIDE ARROW CONTROLS */
+        .arrow-btn {
             position: absolute;
             bottom: 10%;
-            width: 90px; height: 90px;
+            width: 100px; height: 100px;
             background: rgba(255,255,255,0.2);
-            border: 3px solid white;
+            border: 4px solid white;
             border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 2.5rem;
-            z-index: 20;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 3rem;
+            color: white;
+            z-index: 50;
             user-select: none;
         }
 
-        #btn-left { left: 5%; }
-        #btn-right { right: 5%; }
-        #btn-brake { bottom: 5%; left: 50%; transform: translateX(-50%); width: 120px; border-radius: 10px; font-size: 1rem; }
+        #left-arrow { left: 40px; }
+        #right-arrow { right: 40px; }
 
-        /* LOADING BAR */
-        .loader { width: 300px; height: 8px; background: #333; border-radius: 4px; overflow: hidden; margin-top: 20px; }
-        #load-progress { width: 0%; height: 100%; background: var(--red); transition: 0.1s; }
+        .brake-zone {
+            position: absolute;
+            bottom: 20px; left: 50%;
+            transform: translateX(-50%);
+            width: 200px; height: 60px;
+            background: rgba(255,0,0,0.3);
+            border: 2px solid var(--red);
+            border-radius: 10px;
+            display: flex; justify-content: center; align-items: center;
+            font-weight: bold; color: white;
+            z-index: 50;
+        }
 
+        /* LOADER */
+        .loader-bar { width: 300px; height: 10px; background: #222; border-radius: 5px; margin-top: 20px; overflow: hidden; }
+        #fill { width: 0%; height: 100%; background: var(--red); }
     </style>
 </head>
 <body>
 
-    <div id="game-wrapper">
-        <div id="main-container">
+    <div id="orientation-wrapper">
+        <div id="game-container">
 
             <!-- HUD -->
             <div id="hud" class="hidden">
-                <div class="hud-card">
-                    <small>COINS</small>
-                    <div class="coin-count" id="coin-txt">0</div>
-                </div>
-                <div class="hud-card">
-                    <small>DISTANCE</small>
-                    <div id="dist-txt">0m</div>
-                </div>
+                <div class="hud-item">💰 COINS: <span id="coin-val">0</span></div>
+                <div class="hud-item" style="border-color: var(--gold);">🏁 DIST: <span id="dist-val">0</span>m</div>
             </div>
 
-            <!-- Side Arrow Controls -->
-            <div id="ctrl-layer" class="hidden">
-                <div class="ctrl-btn" id="btn-left">⬅️</div>
-                <div class="ctrl-btn" id="btn-right">➡️</div>
-                <div class="ctrl-btn" id="btn-brake">BRAKE</div>
+            <!-- CONTROLS -->
+            <div id="ui-controls" class="hidden">
+                <div class="arrow-btn" id="left-arrow">⬅</div>
+                <div class="arrow-btn" id="right-arrow">➡</div>
+                <div class="brake-zone" id="brake-btn">BRAKE / REVERSE</div>
             </div>
 
-            <!-- Loading Screen -->
-            <div id="screen-loading" class="screen">
+            <!-- LOADING SCREEN -->
+            <div id="screen-loading" class="overlay">
                 <h1>ANSHU</h1>
                 <p>LOADING GLB MODELS...</p>
-                <div class="loader"><div id="load-progress"></div></div>
+                <div class="loader-bar"><div id="fill"></div></div>
             </div>
 
-            <!-- Start Screen -->
-            <div id="screen-start" class="screen hidden">
+            <!-- START SCREEN -->
+            <div id="screen-start" class="overlay hidden">
                 <h1>ANSHU</h1>
-                <p style="letter-spacing: 5px; color: var(--blue);">POLICE CHASE</p>
-                <button id="start-btn">▶ START GAME</button>
+                <p style="color: var(--blue); letter-spacing: 5px;">CAR CHASE 3D</p>
+                <button class="btn-main" id="start-btn">▶ START ENGINE</button>
+                <p style="font-size: 0.8rem; margin-top: 20px; opacity: 0.6;">(Hold phone in Landscape)</p>
             </div>
 
-            <!-- Game Over -->
-            <div id="screen-over" class="screen hidden">
-                <h1 style="color: var(--red);">BUSTED</h1>
-                <p id="final-stats" style="font-size: 1.5rem;">Coins: 0 | Dist: 0m</p>
-                <button id="retry-btn">RETRY</button>
+            <!-- GAME OVER -->
+            <div id="screen-over" class="overlay hidden">
+                <h1 style="color: var(--red);">BUSTED!</h1>
+                <p id="final-score" style="font-size: 1.5rem;">Score: 0</p>
+                <button class="btn-main" id="retry-btn">TRY AGAIN</button>
             </div>
 
         </div>
@@ -195,36 +182,34 @@
         import * as THREE from 'three';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-        class Game {
+        class AnshuChase {
             constructor() {
-                this.initEngine();
-                this.loadAssets();
+                this.initScene();
+                this.loadModels();
                 this.bindInputs();
             }
 
-            initEngine() {
+            initScene() {
+                this.container = document.getElementById('game-container');
                 this.scene = new THREE.Scene();
-                this.scene.background = new THREE.Color(0x87ceeb); // Day Sky
-                this.scene.fog = new THREE.Fog(0x87ceeb, 50, 150);
+                this.scene.background = new THREE.Color(0x87ceeb);
+                this.scene.fog = new THREE.Fog(0x87ceeb, 40, 180);
 
-                this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+                
                 this.renderer = new THREE.WebGLRenderer({ antialias: true });
-                this.renderer.setSize(window.innerWidth, window.innerHeight);
-                this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
+                this.renderer.setPixelRatio(window.devicePixelRatio);
                 this.renderer.shadowMap.enabled = true;
-                document.getElementById('main-container').appendChild(this.renderer.domElement);
+                this.container.appendChild(this.renderer.domElement);
 
-                // Daytime Lighting
-                const ambient = new THREE.AmbientLight(0xffffff, 0.8);
-                this.scene.add(ambient);
-
-                this.sun = new THREE.DirectionalLight(0xffffff, 1.5);
-                this.sun.position.set(50, 100, 50);
+                // Lighting
+                const amb = new THREE.AmbientLight(0xffffff, 0.8);
+                this.scene.add(amb);
+                
+                this.sun = new THREE.DirectionalLight(0xffffff, 1.2);
+                this.sun.position.set(20, 50, 20);
                 this.sun.castShadow = true;
-                this.sun.shadow.camera.left = -50;
-                this.sun.shadow.camera.right = 50;
-                this.sun.shadow.camera.top = 50;
-                this.sun.shadow.camera.bottom = -50;
                 this.scene.add(this.sun);
 
                 // State
@@ -232,27 +217,30 @@
                 this.isRunning = false;
                 this.speed = 0;
                 this.dist = 0;
-                this.coinsCollected = 0;
+                this.coins = 0;
                 this.lane = 0; // -1, 0, 1
                 this.roadTiles = [];
-                this.obstacles = [];
-                this.coins = [];
-                this.keys = { left: false, right: false, brake: false };
+                this.traffic = [];
+                this.items = [];
                 this.clock = new THREE.Clock();
+                this.keys = { left: false, right: false, brake: false };
             }
 
-            loadAssets() {
+            loadModels() {
                 const manager = new THREE.LoadingManager();
                 const loader = new GLTFLoader(manager);
-                const progress = document.getElementById('load-progress');
+                
+                manager.onProgress = (u, l, t) => {
+                    document.getElementById('fill').style.width = (l/t*100) + '%';
+                };
 
-                manager.onProgress = (u, l, t) => progress.style.width = (l/t*100) + '%';
                 manager.onLoad = () => {
                     document.getElementById('screen-loading').classList.add('hidden');
                     document.getElementById('screen-start').classList.remove('hidden');
                     this.setupGameObjects();
                 };
 
+                // Exact filenames from your screenshot
                 const files = [
                     { id: 'player', url: 'CAR Model.glb' },
                     { id: 'police', url: 'Police Car.glb' },
@@ -263,60 +251,76 @@
 
                 files.forEach(f => {
                     loader.load(f.url, (glb) => {
+                        // Fix scaling and centering for all models
+                        const box = new THREE.Box3().setFromObject(glb.scene);
+                        const size = box.getSize(new THREE.Vector3());
+                        const scale = 3 / Math.max(size.x, size.y, size.z);
+                        glb.scene.scale.set(scale, scale, scale);
+                        
                         this.assets[f.id] = glb.scene;
                         glb.scene.traverse(c => { if(c.isMesh) { c.castShadow = true; c.receiveShadow = true; }});
-                    }, undefined, () => {
-                        this.assets[f.id] = new THREE.Mesh(new THREE.BoxGeometry(2,1,4), new THREE.MeshPhongMaterial({color: 0x555555}));
-                    });
+                    }, undefined, (e) => console.error("Error loading " + f.url, e));
                 });
             }
 
             setupGameObjects() {
                 // Player
                 this.player = new THREE.Group();
-                const car = this.assets['player'].clone();
-                car.rotation.y = Math.PI;
-                this.player.add(car);
+                const carModel = this.assets['player'].clone();
+                carModel.rotation.y = Math.PI; // Face forward
+                this.player.add(carModel);
                 this.scene.add(this.player);
 
                 // Police
                 this.police = this.assets['police'].clone();
-                this.police.position.set(0, 0, -30);
+                this.police.position.set(0, 0, -40);
                 this.scene.add(this.police);
 
-                // Road Loop
-                for(let i=0; i<6; i++) {
-                    this.createRoad(i * 100);
+                // Infinite Road tiles
+                for(let i=0; i<8; i++) {
+                    this.createRoadTile(i * 60);
                 }
 
                 this.animate();
             }
 
-            createRoad(z) {
+            createRoadTile(z) {
                 const group = new THREE.Group();
-                const road = new THREE.Mesh(new THREE.PlaneGeometry(20, 100), new THREE.MeshStandardMaterial({ color: 0x333333 }));
+                
+                // Asphalt
+                const road = new THREE.Mesh(
+                    new THREE.PlaneGeometry(20, 60),
+                    new THREE.MeshStandardMaterial({ color: 0x222222 })
+                );
                 road.rotation.x = -Math.PI/2;
                 road.receiveShadow = true;
                 group.add(road);
 
-                const lineGeo = new THREE.PlaneGeometry(0.5, 15);
+                // White markings
+                const lineGeo = new THREE.PlaneGeometry(0.5, 6);
                 const lineMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-                for(let i=0; i<4; i++) {
+                for(let i=0; i<3; i++) {
                     const l = new THREE.Mesh(lineGeo, lineMat);
                     l.rotation.x = -Math.PI/2;
-                    l.position.set(-3.5, 0.02, -37.5 + i*25);
+                    l.position.set(-3.5, 0.02, -20 + i*20);
                     group.add(l);
                     const r = l.clone();
-                    r.position.set(3.5, 0.02, -37.5 + i*25);
+                    r.position.set(3.5, 0.02, -20 + i*20);
                     group.add(r);
                 }
 
-                // Trees
-                for(let i=0; i<6; i++) {
+                // Grass/Dirt sides
+                const grass = new THREE.Mesh(new THREE.PlaneGeometry(100, 60), new THREE.MeshStandardMaterial({color: 0x3d6e1d}));
+                grass.rotation.x = -Math.PI/2;
+                grass.position.y = -0.1;
+                group.add(grass);
+
+                // Trees on side
+                for(let i=0; i<4; i++) {
                     const side = Math.random() > 0.5 ? 1 : -1;
-                    const tree = this.assets[Math.random() > 0.5 ? 'tree' : 'bigtree'].clone();
-                    tree.position.set(side * (13 + Math.random()*5), 0, (Math.random()-0.5)*100);
-                    group.add(tree);
+                    const t = this.assets[Math.random() > 0.5 ? 'tree' : 'bigtree'].clone();
+                    t.position.set(side * (15 + Math.random()*10), 0, (Math.random()-0.5)*60);
+                    group.add(t);
                 }
 
                 group.position.z = z;
@@ -324,46 +328,67 @@
                 this.roadTiles.push(group);
             }
 
-            spawnCoin() {
-                if(Math.random() < 0.05) {
+            spawnNPC() {
+                if(Math.random() < 0.015) {
                     const lane = Math.floor(Math.random()*3)-1;
-                    const geo = new THREE.TorusGeometry(0.6, 0.15, 8, 16);
-                    const mat = new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 1, roughness: 0.2 });
-                    const coin = new THREE.Mesh(geo, mat);
-                    coin.position.set(lane * 5, 1.2, this.player.position.z + 150);
-                    this.scene.add(coin);
-                    this.coins.push(coin);
+                    const npc = this.assets['player'].clone(); // Use player's car model
+                    
+                    // Change color of NPC
+                    const colors = [0xffffff, 0x333333, 0x0000ff, 0x00ff00, 0xffff00];
+                    const randomColor = colors[Math.floor(Math.random()*colors.length)];
+                    npc.traverse(c => {
+                        if(c.isMesh) {
+                            c.material = c.material.clone();
+                            c.material.color.setHex(randomColor);
+                        }
+                    });
+
+                    npc.position.set(lane * 6, 0, this.player.position.z + 150);
+                    npc.userData = { speed: 0.1 + Math.random()*0.2 };
+                    this.scene.add(npc);
+                    this.traffic.push(npc);
                 }
             }
 
-            spawnObstacle() {
-                if(Math.random() < 0.02) {
+            spawnCoin() {
+                if(Math.random() < 0.05) {
                     const lane = Math.floor(Math.random()*3)-1;
-                    const block = this.assets['block'].clone();
-                    block.position.set(lane * 5, 0, this.player.position.z + 200);
-                    this.scene.add(block);
-                    this.obstacles.push(block);
+                    const geo = new THREE.TorusGeometry(0.8, 0.2, 8, 16);
+                    const mat = new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 1, roughness: 0.2 });
+                    const coin = new THREE.Mesh(geo, mat);
+                    coin.rotation.y = Math.PI/2;
+                    coin.position.set(lane * 6, 1.5, this.player.position.z + 120);
+                    coin.userData = { type: 'coin' };
+                    this.scene.add(coin);
+                    this.items.push(coin);
                 }
             }
 
             bindInputs() {
-                const startBtn = document.getElementById('start-btn');
-                startBtn.onclick = () => {
-                    this.enterFullscreen();
-                    this.startGame();
+                document.getElementById('start-btn').onclick = () => {
+                    this.isRunning = true;
+                    this.speed = 0.5;
+                    this.dist = 0;
+                    this.coins = 0;
+                    document.querySelectorAll('.overlay').forEach(s => s.classList.add('hidden'));
+                    document.getElementById('hud').classList.remove('hidden');
+                    document.getElementById('ui-controls').classList.remove('hidden');
+                    
+                    // Try Fullscreen
+                    const de = document.documentElement;
+                    if(de.requestFullscreen) de.requestFullscreen();
                 };
 
-                document.getElementById('retry-btn').onclick = () => this.startGame();
+                document.getElementById('retry-btn').onclick = () => location.reload();
 
-                // Touch Controls
-                const bind = (id, key) => {
+                const setupBtn = (id, key) => {
                     const el = document.getElementById(id);
-                    el.ontouchstart = (e) => { e.preventDefault(); this.keys[key] = true; el.style.background = "rgba(255,255,255,0.5)"; };
-                    el.ontouchend = (e) => { e.preventDefault(); this.keys[key] = false; el.style.background = "rgba(255,255,255,0.2)"; };
+                    el.ontouchstart = (e) => { e.preventDefault(); this.keys[key] = true; el.style.opacity = "0.5"; };
+                    el.ontouchend = (e) => { e.preventDefault(); this.keys[key] = false; el.style.opacity = "1"; };
                 };
-                bind('btn-left', 'left');
-                bind('btn-right', 'right');
-                bind('btn-brake', 'brake');
+                setupBtn('left-arrow', 'left');
+                setupBtn('right-arrow', 'right');
+                setupBtn('brake-btn', 'brake');
 
                 window.addEventListener('resize', () => {
                     this.camera.aspect = window.innerWidth / window.innerHeight;
@@ -372,113 +397,86 @@
                 });
             }
 
-            enterFullscreen() {
-                const el = document.documentElement;
-                if (el.requestFullscreen) el.requestFullscreen();
-                else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-            }
-
-            startGame() {
-                this.isRunning = true;
-                this.dist = 0;
-                this.speed = 0.5;
-                this.coinsCollected = 0;
-                this.lane = 0;
-                this.player.position.set(0,0,0);
-                this.police.position.set(0,0,-30);
-                
-                this.obstacles.forEach(o => this.scene.remove(o));
-                this.coins.forEach(c => this.scene.remove(c));
-                this.obstacles = [];
-                this.coins = [];
-
-                document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-                document.getElementById('hud').classList.remove('hidden');
-                document.getElementById('ctrl-layer').classList.remove('hidden');
-            }
-
-            gameOver() {
-                this.isRunning = false;
-                document.getElementById('screen-over').classList.remove('hidden');
-                document.getElementById('final-stats').innerText = `Coins: ${this.coinsCollected} | Dist: ${Math.floor(this.dist)}m`;
-            }
-
             animate() {
                 requestAnimationFrame(() => this.animate());
                 const dt = this.clock.getDelta();
 
                 if(this.isRunning) {
-                    // Movement
-                    if(this.keys.brake) this.speed = THREE.MathUtils.lerp(this.speed, 0.2, 0.05);
-                    else this.speed = Math.min(2.2, this.speed + 0.001);
+                    // Physics
+                    if(this.keys.brake) this.speed = THREE.MathUtils.lerp(this.speed, -0.2, 0.05);
+                    else this.speed = Math.min(2.0, this.speed + 0.002);
 
-                    this.dist += this.speed;
                     this.player.position.z += this.speed;
+                    this.dist += this.speed;
 
-                    if(this.keys.left) this.lane = Math.max(-1.2, this.lane - 0.05);
-                    if(this.keys.right) this.lane = Math.min(1.2, this.lane + 0.05);
+                    // Steering
+                    if(this.keys.left) this.lane = Math.max(-1.3, this.lane - 0.05);
+                    if(this.keys.right) this.lane = Math.min(1.3, this.lane + 0.05);
 
-                    const tx = this.lane * 5;
-                    this.player.position.x = THREE.MathUtils.lerp(this.player.position.x, tx, 0.1);
-                    this.player.rotation.z = (tx - this.player.position.x) * 0.1;
-                    this.player.rotation.y = Math.PI + (this.player.position.x - tx) * 0.2;
+                    const targetX = this.lane * 6;
+                    this.player.position.x = THREE.MathUtils.lerp(this.player.position.x, targetX, 0.1);
+                    this.player.rotation.y = Math.PI + (this.player.position.x - targetX) * 0.1;
 
-                    // Police
+                    // Police AI
                     const gap = this.player.position.z - this.police.position.z;
-                    this.police.position.z += (gap > 40) ? this.speed * 1.1 : this.speed * 0.98;
-                    this.police.position.x = THREE.MathUtils.lerp(this.police.position.x, this.player.position.x, 0.03);
+                    this.police.position.z += (gap > 50) ? this.speed * 1.1 : this.speed * 0.98;
+                    this.police.position.x = THREE.MathUtils.lerp(this.police.position.x, this.player.position.x, 0.02);
                     
-                    if(gap < 4.5) this.gameOver();
+                    if(gap < 5) {
+                        this.isRunning = false;
+                        document.getElementById('screen-over').classList.remove('hidden');
+                        document.getElementById('final-score').innerText = `Dist: ${Math.floor(this.dist)}m | Coins: ${this.coins}`;
+                    }
 
-                    // Loops & Spawns
-                    this.roadTiles.forEach(t => { if(this.player.position.z - t.position.z > 100) t.position.z += 600; });
-                    this.spawnObstacle();
+                    // World Loop
+                    this.roadTiles.forEach(t => { if(this.player.position.z - t.position.z > 60) t.position.z += 480; });
+                    
+                    // Spawn
+                    this.spawnNPC();
                     this.spawnCoin();
 
-                    // Coin Collision & Rotation
-                    this.coins.forEach((c, i) => {
-                        c.rotation.y += 0.05;
-                        const d = this.player.position.distanceTo(c.position);
-                        if(d < 3) {
-                            this.coinsCollected += 10;
+                    // Traffic
+                    this.traffic.forEach((n, i) => {
+                        n.position.z += n.userData.speed;
+                        if(this.player.position.distanceTo(n.position) < 4) {
+                            this.speed *= 0.3; // Crash
+                            this.scene.remove(n);
+                            this.traffic.splice(i, 1);
+                        }
+                        if(this.player.position.z - n.position.z > 20) {
+                            this.scene.remove(n);
+                            this.traffic.splice(i, 1);
+                        }
+                    });
+
+                    // Items
+                    this.items.forEach((c, i) => {
+                        c.rotation.z += 0.1;
+                        if(this.player.position.distanceTo(c.position) < 3.5) {
+                            this.coins++;
                             this.scene.remove(c);
-                            this.coins.splice(i, 1);
+                            this.items.splice(i, 1);
                         }
                         if(this.player.position.z - c.position.z > 20) {
                             this.scene.remove(c);
-                            this.coins.splice(i, 1);
+                            this.items.splice(i, 1);
                         }
                     });
 
-                    // Obstacle Collision
-                    this.obstacles.forEach((o, i) => {
-                        const dx = Math.abs(o.position.x - this.player.position.x);
-                        const dz = Math.abs(o.position.z - this.player.position.z);
-                        if(dx < 2.5 && dz < 3.5) {
-                            this.speed *= 0.4;
-                            this.scene.remove(o);
-                            this.obstacles.splice(i, 1);
-                        }
-                        if(this.player.position.z - o.position.z > 20) {
-                            this.scene.remove(o);
-                            this.obstacles.splice(i, 1);
-                        }
-                    });
-
-                    // Camera
-                    this.camera.position.lerp(new THREE.Vector3(this.player.position.x*0.5, 6, this.player.position.z - 12), 0.1);
-                    this.camera.lookAt(this.player.position.x, 2, this.player.position.z + 15);
+                    // Camera Follow
+                    this.camera.position.lerp(new THREE.Vector3(this.player.position.x * 0.6, 8, this.player.position.z - 18), 0.1);
+                    this.camera.lookAt(this.player.position.x, 2, this.player.position.z + 10);
 
                     // UI
-                    document.getElementById('dist-txt').innerText = Math.floor(this.dist) + 'm';
-                    document.getElementById('coin-txt').innerText = this.coinsCollected;
+                    document.getElementById('coin-val').innerText = this.coins;
+                    document.getElementById('dist-val').innerText = Math.floor(this.dist);
                 }
 
                 this.renderer.render(this.scene, this.camera);
             }
         }
 
-        new Game();
+        new AnshuChase();
     </script>
 </body>
 </html>
